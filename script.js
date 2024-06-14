@@ -17,12 +17,8 @@ function startGame() {
 
     // Adjust to an even number of total cards if necessary
     if (totalCards % 2 !== 0) {
-        if (cols > rows) {
-            cols--;
-        } else {
-            rows--;
-        }
-        totalCards = rows * cols;
+        alert('Please choose dimensions that result in an even number of total cards.');
+        return;
     }
 
     const colors = generateColors(totalCards / 2);
@@ -30,7 +26,7 @@ function startGame() {
     gameContainer.innerHTML = '';
     gameContainer.style.gridTemplateRows = `repeat(${rows}, ${cardHeight}px)`;
     gameContainer.style.gridTemplateColumns = `repeat(${cols}, ${cardWidth}px)`;
-    
+
     let revealedCards = [];
     let matchedPairs = 0;
 
