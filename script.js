@@ -56,9 +56,9 @@ function startGame() {
 
         card.dataset.color = colors[index];
 
-        // Initialize the card with a gray color
-        gl.clearColor(0.5, 0.5, 0.5, 1.0);
-        gl.clear(gl.COLOR_BUFFER_BIT);
+        // Initialize the card with a gray color using shaders
+        initShaders(gl);
+        drawCard(gl, [0.5, 0.5, 0.5]);
 
         card.addEventListener('click', function() {
             if (revealedCards.length < 2 && !card.classList.contains('revealed')) {
@@ -67,8 +67,7 @@ function startGame() {
 
                 const color = card.dataset.color;
                 const [r, g, b] = getColorComponents(color);
-                gl.clearColor(r, g, b, 1.0);
-                gl.clear(gl.COLOR_BUFFER_BIT);
+                drawCard(gl, [r, g, b]);
                 card.classList.add('revealed');
                 revealedCards.push(card);
 
@@ -121,11 +120,80 @@ function getColorComponents(color) {
 function hideCard(card) {
     const canvas = card.querySelector('canvas');
     const gl = canvas.getContext('webgl');
-    gl.clearColor(0.5, 0.5, 0.5, 1.0);
-    gl.clear(gl.COLOR_BUFFER_BIT);
+    drawCard(gl, [0.5, 0.5, 0.5]);
     card.classList.remove('revealed');
 }
 
 function updateStepCounter() {
     document.getElementById('step-counter').textContent = `Steps: ${steps}`;
+}
+
+function initShaders(gl) {
+    const vertexShaderSource = `
+        attribute vec4 a_Position;
+        void main() {
+            gl_Position = a_Position;
+        }
+    `;
+
+    const fragmentShaderSource = `
+        precision mediump float;
+        uniform vec4 u_FragColor;
+        void main() {
+            gl_FragColor = u_FragColor;
+        }
+    `;
+
+    const vertexShader = loadShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+    const fragmentShader = loadShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+
+    const shaderProgram = gl.createProgram();
+    gl.attachShader(shaderProgram, vertexShader);
+    gl.attachShader(shaderProgram, fragmentShader);
+    gl.linkProgram(shaderProgram);
+
+    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+        console.error('Could not initialize shaders');
+        return null;
+    }
+
+    gl.useProgram(shaderProgram);
+    gl.program = shaderProgram;
+}
+
+function loadShader(gl, type, source) {
+    const shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        console.error(`Error compiling shader: ${gl.getShaderInfoLog(shader)}`);
+        gl.deleteShader(shader);
+        return null;
+    }
+
+    return shader;
+}
+
+function drawCard(gl, color) {
+    const vertices = new Float32Array([
+        -1.0,  1.0,
+        -1.0, -1.0,
+         1.0,  1.0,
+         1.0, -1.0,
+    ]);
+
+    const vertexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+
+    const a_Position = gl.getAttribLocation(gl.program, 'a_Position');
+    gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(a_Position);
+
+    const u_FragColor = gl.getUniformLocation(gl.program, 'u_FragColor');
+    gl.uniform4f(u_FragColor, color[0], color[1], color[2], 1.0);
+
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 }
