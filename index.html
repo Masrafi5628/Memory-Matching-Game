@@ -3,23 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Memory Matching Game</title>
+    <title>Memory Card Game with WebGL Transformations</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="game-controls">
-        <label for="rows">Rows: </label>
-        <input type="number" id="rows" min="1" value="2">
-        <label for="cols">Columns: </label>
-        <input type="number" id="cols" min="1" value="2">
-        <!-- <label for="card-width">Card Width: </label>
-        <input type="number" id="card-width" min="50" value="100">
-        <label for="card-height">Card Height: </label>
-        <input type="number" id="card-height" min="50" value="100"> -->
+    <div class="controls">
+        <label for="rows">Rows:</label>
+        <input type="number" id="rows" value="2" min="1">
+        <label for="cols">Columns:</label>
+        <input type="number" id="cols" value="2" min="1">
+        <label for="card-width">Card Width (px):</label>
+        <input type="number" id="card-width" value="100" min="50">
+        <label for="card-height">Card Height (px):</label>
+        <input type="number" id="card-height" value="100" min="50">
         <button onclick="startGame()">Start Game</button>
+        <p>Steps: <span id="steps">0</span></p>
     </div>
     <div id="game-container"></div>
-    <div id="step-counter">Steps: 0</div>
     <script src="script.js"></script>
 </body>
 </html>
